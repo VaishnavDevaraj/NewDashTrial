@@ -1,0 +1,67 @@
+/* Custom styles for Smart Dashboard */
+
+body {
+    background-color: #f8f9fa;
+}
+
+.navbar-brand {
+    font-weight: 600;
+}
+
+.card {
+    border-radius: 0.5rem;
+    border: none;
+}
+
+.card-header {
+    border-radius: 0.5rem 0.5rem 0 0 !important;
+}
+
+.btn {
+    border-radius: 0.25rem;
+}
+
+.grid-stack {
+    background-color: #f0f2f5;
+    border-radius: 0.5rem;
+    padding: 20px;
+    min-height: 500px;
+}
+
+/* Dashboard item styles */
+.visualization-container {
+    border-radius: 0.25rem;
+    background-color: #fff;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.visualization-header {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.visualization-body {
+    flex: 1;
+    overflow: hidden;
+    padding: 8px;
+}
+
+/* Form styles */
+.form-control:focus, .form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Table styles */
+.table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+/* Activity badges */
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.75em;
+}
