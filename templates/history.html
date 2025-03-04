@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity History - Smart Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('dashboard.index') }}">Smart Dashboard</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.index') }}">Dashboards</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('history.view_history') }}">History</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            {{ session.get('name') or session.get('email') }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <h2 class="mb-4">Activity History</h2>
+        
+        <div class="card shadow-sm">
+            <div class="card-body">
+                {% if history %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Action</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in history %}
+                                    <tr>
+                                        <td>{{ entry.timestamp }}</td>
+                                        <td>
+                                            {% if entry.action == 'login' %}
+                                                <span class="badge bg-success">Login</span>
+                                            {% elif entry.action == 'logout' %}
+                                                <span class="badge bg-secondary">Logout</span>
+                                            {% elif entry.action == 'registration' %}
+                                                <span class="badge bg-primary">Registration</span>
+                                            {% elif entry.action == 'password_change' %}
+                                                <span class="badge bg-warning text-dark">Password Change</span>
+                                            {% elif entry.action == 'create_dashboard' %}
+                                                <span class="badge bg-info text-dark">Create Dashboard</span>
+                                            {% elif entry.action == 'upload_dataset' %}
+                                                <span class="badge bg-info text-dark">Upload Dataset</span>
+                                            {% elif entry.action == 'create_visualization' %}
+                                                <span class="badge bg-info text-dark">Create Visualization</span>
+                                            {% elif entry.action == 'update_dashboard_layout' %}
+                                                <span class="badge bg-info text-dark">Update Layout</span>
+                                            {% elif entry.action == 'delete_visualization' %}
+                                                <span class="badge bg-danger">Delete Visualization</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ entry.action }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ entry.description }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-clock-history fs-1 text-muted"></i>
+                        <p class="mt-2">No activity history found.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
