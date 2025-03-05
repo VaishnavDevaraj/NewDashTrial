@@ -1,0 +1,26 @@
+line_chart:
+  chart_type: line
+  confidence_threshold: 0.5
+  required_axes:
+    - type: TIME
+      min_score: 0.5
+    - type: METRIC
+      min_score: 0.5
+
+bar_chart:
+  chart_type: bar
+  confidence_threshold: 0.5
+  required_axes:
+    - type: DIMENSION
+      min_score: 0.5
+    - type: METRIC
+      min_score: 0.5
+
+scatter_plot:
+  chart_type: scatter
+  confidence_threshold: 0.5
+  required_axes:
+    - type: METRIC
+      min_score: 0.5
+    - type: METRIC
+      min_score: 0.5

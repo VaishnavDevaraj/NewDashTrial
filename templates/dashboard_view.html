@@ -167,7 +167,6 @@
 
 <script>
     // Then in your JavaScript:
-    const dataElement = document.getElementById('dashboardData');
     const dashboardId = JSON.parse(dataElement.getAttribute('data-dashboard-id'));
     const visualizations = JSON.parse(dataElement.getAttribute('data-visualizations'));
 </script>
@@ -664,15 +663,21 @@
             loadingDiv.innerHTML = '<i class="bi bi-hourglass"></i> Creating visualization...';
             document.querySelector('.container-fluid').appendChild(loadingDiv);
             
+            // Get dataset ID from selection
+            const datasetId = document.getElementById('datasetSelect').value;
+            const dashboardId = document.getElementById('dashboardData').dataset.dashboardId; // ✅ Ensure this is read correctly
+
+            if (!dashboardId || !datasetId) {
+                alert('Please select a dataset.');
+                return;
+            }
             // Create the visualization on the server
             fetch('/dashboard/api/create_visualization', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    dashboard_id: dashboardId,
-                    dataset_id: datasetId,
+                    dashboard_id: parseInt(dashboardId),  // ✅ Ensure it's an integer
+                    dataset_id: parseInt(datasetId),  // ✅ Ensure it's an integer
                     type: vizType,
                     config: config,
                     position: { x: 0, y: 0, w: 6, h: 6 }
@@ -779,5 +784,259 @@
             });
         });
     </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let addBtn = document.getElementById('addVisualizationBtn');
+            let saveBtn = document.getElementById('saveLayoutBtn');
+        
+            if (addBtn) {
+                addBtn.addEventListener('click', function() {
+                    console.log("Add Visualization button clicked");
+                    addVisualizationModal.show();
+                });
+            }
+        
+            if (saveBtn) {
+                saveBtn.addEventListener('click', function() {
+                    console.log("Save Layout button clicked");
+                    saveDashboardLayout();
+                });
+            }
+        });
+        </script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                let addBtn = document.getElementById('addVisualizationBtn');
+                let saveBtn = document.getElementById('saveLayoutBtn');
+            
+                if (addBtn) {
+                    addBtn.addEventListener('click', function() {
+                        console.log("Add Visualization button clicked");
+                        addVisualizationModal.show();
+                    });
+                }
+            
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', function() {
+                        console.log("Save Layout button clicked");
+                        saveDashboardLayout();
+                    });
+                }
+            });
+            
+            // Function to save the dashboard layout
+            function saveDashboardLayout() {
+                const layout = {};
+                grid.save().forEach(item => {
+                    layout[item.id] = {
+                        x: item.x,
+                        y: item.y,
+                        w: item.w,
+                        h: item.h
+                    };
+                });
+            
+                fetch('/dashboard/api/update_dashboard_layout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        dashboard_id: document.getElementById('dashboardData').dataset.dashboardId,
+                        layout: layout
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Layout saved successfully.");
+                    } else {
+                        alert("Failed to save layout: " + (data.error || "Unknown error"));
+                    }
+                })
+                .catch(error => {
+                    console.error("Error saving layout:", error);
+                });
+            }
+            </script>
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    let addBtn = document.getElementById('addVisualizationBtn');
+                    let saveBtn = document.getElementById('saveLayoutBtn');
+                
+                    if (addBtn) {
+                        addBtn.addEventListener('click', function() {
+                            console.log("Add Visualization button clicked");
+                            addVisualizationModal.show();
+                        });
+                    }
+                
+                    if (saveBtn) {
+                        saveBtn.addEventListener('click', function() {
+                            console.log("Save Layout button clicked");
+                            saveDashboardLayout();
+                        });
+                    }
+                
+                    // Function to handle dataset selection and fetch visualization suggestions
+                    document.getElementById('datasetSelect').addEventListener('change', function() {
+                        const datasetId = this.value;
+                        if (!datasetId) {
+                            document.getElementById('visualizationSuggestions').style.display = 'none';
+                            return;
+                        }
+                
+                        // Show loading state
+                        document.getElementById('visualizationSuggestions').style.display = 'block';
+                        document.getElementById('suggestionsContainer').innerHTML = `<p>Loading suggestions...</p>`;
+                
+                        fetch(`/dashboard/api/dataset/${datasetId}/suggest_visualizations`)
+                            .then(response => response.json())
+                            .then(suggestions => {
+                                let suggestionsHtml = '';
+                                if (suggestions.length === 0) {
+                                    suggestionsHtml = `<p>No visualization suggestions available.</p>`;
+                                } else {
+                                    suggestions.forEach((suggestion, index) => {
+                                        suggestionsHtml += `
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h6>${suggestion.title}</h6>
+                                                    <p>${suggestion.description}</p>
+                                                    <button class="btn btn-primary add-suggestion-btn"
+                                                        data-suggestion-index="${index}"
+                                                        data-dataset-id="${datasetId}">
+                                                        Add to Dashboard
+                                                    </button>
+                                                </div>
+                                            </div>`;
+                                    });
+                                }
+                
+                                document.getElementById('suggestionsContainer').innerHTML = suggestionsHtml;
+                
+                                // Add click event for suggestion buttons
+                                document.querySelectorAll('.add-suggestion-btn').forEach(button => {
+                                    button.addEventListener('click', function() {
+                                        const suggestionIndex = parseInt(this.getAttribute('data-suggestion-index'));
+                                        const datasetId = this.getAttribute('data-dataset-id');
+                                        const suggestion = suggestions[suggestionIndex];
+                
+                                        createVisualization(datasetId, suggestion.type, suggestion.config);
+                                    });
+                                });
+                            })
+                            .catch(error => {
+                                console.error("Error fetching suggestions:", error);
+                            });
+                    });
+                });
+                </script>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                        let addBtn = document.getElementById('addVisualizationBtn');
+                        let saveBtn = document.getElementById('saveLayoutBtn');
+                    
+                        if (addBtn) {
+                            addBtn.addEventListener('click', function() {
+                                console.log("Add Visualization button clicked");
+                                addVisualizationModal.show();
+                            });
+                        }
+                    
+                        if (saveBtn) {
+                            saveBtn.addEventListener('click', function() {
+                                console.log("Save Layout button clicked");
+                                saveDashboardLayout();
+                            });
+                        }
+                    
+                        // Function to handle dataset selection and fetch visualization suggestions
+                        document.getElementById('datasetSelect').addEventListener('change', function() {
+                            const datasetId = this.value;
+                            if (!datasetId) {
+                                document.getElementById('visualizationSuggestions').style.display = 'none';
+                                return;
+                            }
+                    
+                            // Show loading state
+                            document.getElementById('visualizationSuggestions').style.display = 'block';
+                            document.getElementById('suggestionsContainer').innerHTML = `<p>Loading suggestions...</p>`;
+                    
+                            fetch(`/dashboard/api/dataset/${datasetId}/suggest_visualizations`)
+                                .then(response => response.json())
+                                .then(suggestions => {
+                                    let suggestionsHtml = '';
+                                    if (suggestions.length === 0) {
+                                        suggestionsHtml = `<p>No visualization suggestions available.</p>`;
+                                    } else {
+                                        suggestions.forEach((suggestion, index) => {
+                                            suggestionsHtml += `
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h6>${suggestion.title}</h6>
+                                                        <p>${suggestion.description}</p>
+                                                        <button class="btn btn-primary add-suggestion-btn"
+                                                            data-suggestion-index="${index}"
+                                                            data-dataset-id="${datasetId}">
+                                                            Add to Dashboard
+                                                        </button>
+                                                    </div>
+                                                </div>`;
+                                        });
+                                    }
+                    
+                                    document.getElementById('suggestionsContainer').innerHTML = suggestionsHtml;
+                    
+                                    // Add click event for suggestion buttons
+                                    document.querySelectorAll('.add-suggestion-btn').forEach(button => {
+                                        button.addEventListener('click', function() {
+                                            const suggestionIndex = parseInt(this.getAttribute('data-suggestion-index'));
+                                            const datasetId = this.getAttribute('data-dataset-id');
+                                            const suggestion = suggestions[suggestionIndex];
+                    
+                                            createVisualization(datasetId, suggestion.type, suggestion.config);
+                                        });
+                                    });
+                                })
+                                .catch(error => {
+                                    console.error("Error fetching suggestions:", error);
+                                });
+                        });
+                    });
+                    
+                    // Function to create a new visualization
+                    function createVisualization(datasetId, vizType, config) {
+                        const dashboardId = document.getElementById('dashboardData').dataset.dashboardId;
+                        if (!dashboardId || !datasetId) {
+                            alert("Please select a dataset.");
+                            return;
+                        }
+                    
+                        fetch('/dashboard/api/create_visualization', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                dashboard_id: parseInt(dashboardId),
+                                dataset_id: parseInt(datasetId),
+                                type: vizType,
+                                config: config,
+                                position: { x: 0, y: 0, w: 6, h: 6 }
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.error) {
+                                alert("Error creating visualization: " + data.error);
+                                return;
+                            }
+                            console.log("Visualization Created:", data);
+                            alert("Visualization successfully added!");
+                            location.reload();  // Refresh page to show the new visualization
+                        })
+                        .catch(error => {
+                            console.error("Error:", error);
+                            alert("Failed to create visualization: " + error.message);
+                        });
+                    }
+                    </script>
 </body>
 </html>

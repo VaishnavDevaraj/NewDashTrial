@@ -1,0 +1,55 @@
+name: HEALTHCARE
+axis_patterns:
+  METRIC:
+    preferred_charts:
+      - line
+      - bar
+      - scatter
+    common_metrics:
+      - blood_pressure
+      - heart_rate
+      - temperature
+      - bmi
+      - glucose
+      - cholesterol
+    formatting: "{:.1f}"
+    keywords:
+      - dosage
+      - duration
+      - frequency
+      - mortality
+      - readmission
+      - survival
+    validation_rules:
+      - is_numeric
+      - non_negative
+
+  TIME:
+    preferred_charts:
+      - line
+      - timeline
+    common_metrics:
+      - admission
+      - discharge
+      - follow_up
+      - onset
+    keywords:
+      - length_of_stay
+      - time_to_treatment
+
+  DIMENSION:
+    preferred_charts:
+      - bar
+      - pie
+      - radar
+    common_metrics:
+      - diagnosis
+      - procedure
+      - department
+      - specialty
+      - ward
+    keywords:
+      - condition
+      - treatment
+      - medication
+      - complication

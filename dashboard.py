@@ -1,3 +1,4 @@
+from turtle import position
 from flask import Blueprint, request, render_template, redirect, url_for, flash, session, jsonify
 from auth import login_required
 from database import Database
@@ -175,6 +176,15 @@ def suggest_visualizations(dataset_id):
 @dashboard_bp.route('/api/dataset/<int:dataset_id>/insights')
 @login_required
 def get_dataset_insights(dataset_id):
+    import json
+
+    def custom_serializer(obj):
+        """Convert unsupported object types to JSON serializable format."""
+        if hasattr(obj, "__dict__"):  # Convert objects to dictionaries
+            return obj.__dict__
+        return str(obj)  # Convert other types to strings
+
+    
     # Check if user has access to this dataset
     conn = db.get_connection()
     cursor = conn.cursor()
@@ -196,22 +206,29 @@ def get_dataset_insights(dataset_id):
     viz_gen = VisualizationGenerator(df)
     insights = viz_gen.get_data_insights()
     
-    return jsonify(insights)
+    # Convert non-serializable objects before returning JSON
+    json_safe_insights = json.loads(json.dumps(insights, default=custom_serializer))
+    
+    return jsonify(json_safe_insights)
 
 @dashboard_bp.route('/api/create_visualization', methods=['POST'])
 @login_required
 def create_visualization():
-    data = request.json
-    
+    data = request.get_json()
+
+    # Debugging Log
+    print("Received Create Visualization Data:", data)
+
     dashboard_id = data.get('dashboard_id')
     dataset_id = data.get('dataset_id')
     viz_type = data.get('type')
     config = data.get('config', {})
-    position = data.get('position', {})
-    
+
     # Validate inputs
     if not dashboard_id or not dataset_id or not viz_type:
+        print(f"❌ Missing Parameters - dashboard_id: {dashboard_id}, dataset_id: {dataset_id}, type: {viz_type}")
         return jsonify({'error': 'Missing required parameters'}), 400
+
     
     # Check if user has access to this dashboard and dataset
     conn = db.get_connection()

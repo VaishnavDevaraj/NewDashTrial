@@ -1,0 +1,83 @@
+name: FINANCE
+axis_patterns:
+  CURRENCY:
+    keywords:
+      - principal
+      - disbursement
+      - repayment
+      - obligation
+      - commitment
+      - principal_amount_usd
+      - revenue
+      - expenses
+    strong_indicators: 
+      - '(usd)'
+      - '(us$)'
+    weight: 1.2
+    
+  METRIC:
+    keywords:
+      - balance
+      - total
+      - net
+      - aggregate
+      - cumulative
+      - revenue
+    weight: 1.1
+chart_patterns:
+  waterfall:
+    required_axes:
+      - type: CURRENCY
+      - type: TIME
+    quality_checks:
+      min_data_points: 6
+      min_categories: 4
+    confidence_threshold: 0.5
+
+  trend_analysis:
+    required_axes:
+      - type: TIME
+      - type: CURRENCY
+    quality_checks:
+      min_data_points: 10
+      correlation_threshold: 0.3
+    confidence_threshold: 0.75
+    chart_type: line
+
+  contribution_breakdown:
+    required_axes:
+      - type: DIMENSION
+      - type: CURRENCY
+    quality_checks:
+      min_categories: 3
+    confidence_threshold: 0.8
+
+  regional_distribution:
+    required_axes:
+      - type: GEOGRAPHIC
+      - type: CURRENCY
+    quality_checks:
+      min_categories: 5
+      min_data_points: 8
+    confidence_threshold: 0.75
+
+  temporal_comparison:
+    required_axes:
+      - type: TIME
+      - type: CURRENCY
+      - type: DIMENSION
+    quality_checks:
+      min_data_points: 12
+      min_categories: 2
+    confidence_threshold: 0.8
+    chart_type: line
+
+  trend_line:
+    required_axes:
+      - type: TIME
+      - type: METRIC
+    quality_checks:
+      min_data_points: 8
+      correlation_threshold: 0.2
+    confidence_threshold: 0.7
+    chart_type: line
